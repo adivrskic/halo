@@ -1,0 +1,434 @@
+// Halo Theme - Minimal
+$halo-glow: #ffffff;
+$background-color: #000000;
+$text-color: #ffffff;
+$text-secondary: rgba(255, 255, 255, 0.5);
+$transition: all 0.3s ease;
+
+// Reset
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: $background-color;
+  overflow: hidden;
+}
+
+// Main container
+.app-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: $background-color;
+}
+
+// Canvas wrapper for mobile shift
+.canvas-wrapper {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  @media (max-width: 768px) {
+    &.shifted {
+      transform: translateY(-20vh);
+    }
+  }
+}
+
+// Loading Screen
+.loading-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $background-color;
+  z-index: 1000;
+
+  .loading-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  // Static text in center
+  .loading-title {
+    font-size: 12px;
+    font-weight: 300;
+    letter-spacing: 4px;
+    color: $halo-glow;
+    text-transform: uppercase;
+    opacity: 0.9;
+  }
+
+  // Spinning ring around text
+  .spinner {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    border: 1px solid rgba($halo-glow, 0.15);
+    border-radius: 50%;
+    animation: spin 1.2s infinite linear;
+
+    &::before {
+      content: "";
+      display: block;
+      position: absolute;
+      left: -1px;
+      top: -1px;
+      width: 100%;
+      height: 100%;
+      border-top: 1px solid rgba($halo-glow, 0.9);
+      border-left: 1px solid transparent;
+      border-bottom: 1px solid transparent;
+      border-right: 1px solid transparent;
+      border-radius: 50%;
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+// Bottom bar with title and controls
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 100;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+.bottom-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Icon link (GitHub)
+.icon-link {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba($text-color, 0.5);
+  transition: $transition;
+
+  &:hover {
+    color: rgba($text-color, 0.9);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// App Title - fade in animation
+.app-title {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .title-text {
+    font-size: 12px;
+    font-weight: 300;
+    letter-spacing: 4px;
+    color: rgba($halo-glow, 0.7);
+    text-transform: uppercase;
+  }
+}
+
+// Halo-style menu button
+.control-button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid rgba($halo-glow, 0.25);
+  border-radius: 50%;
+  color: rgba($text-color, 0.7);
+  cursor: pointer;
+  transition: $transition;
+
+  &:hover {
+    border-color: rgba($halo-glow, 0.5);
+    color: $text-color;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  &.active {
+    border-color: rgba($halo-glow, 0.6);
+    color: $text-color;
+    animation: none;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba($halo-glow, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba($halo-glow, 0);
+  }
+}
+
+// Control Panel - minimal, no background
+.control-panel {
+  position: fixed;
+  bottom: 70px;
+  right: 24px;
+  width: 280px;
+  max-height: 70vh;
+  z-index: 99;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-height: 40vh;
+  }
+}
+
+// Scrollable content inside panel
+.panel-content {
+  max-height: inherit;
+  overflow-y: auto;
+  padding: 10px 0;
+  padding-right: 20px;
+
+  // Minimal scrollbar
+  &::-webkit-scrollbar {
+    width: 2px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba($halo-glow, 0.2);
+    border-radius: 1px;
+  }
+}
+
+// Fade overlays for control panel
+.panel-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10%;
+  pointer-events: none;
+  z-index: 1;
+
+  &.panel-fade-top {
+    top: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba($background-color, 0.9) 0%,
+      rgba($background-color, 0) 100%
+    );
+  }
+
+  &.panel-fade-bottom {
+    bottom: 0;
+    background: linear-gradient(
+      to top,
+      rgba($background-color, 0.9) 0%,
+      rgba($background-color, 0) 100%
+    );
+  }
+}
+
+// Control Groups
+.control-group {
+  margin-bottom: 24px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.control-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+
+  .label-text {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: $text-secondary;
+  }
+
+  .label-value {
+    font-size: 10px;
+    font-weight: 400;
+    color: rgba($halo-glow, 0.6);
+    font-family: "SF Mono", Monaco, monospace;
+  }
+}
+
+.input-wrapper {
+  input[type="range"] {
+    width: 100%;
+    height: 20px;
+    -webkit-appearance: none;
+    background: transparent;
+
+    &::-webkit-slider-runnable-track {
+      height: 1px;
+      background: rgba($halo-glow, 0.2);
+      border-radius: 0;
+    }
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba($halo-glow, 0.8);
+      cursor: pointer;
+      margin-top: -4.5px;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: $halo-glow;
+      }
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 8px 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba($halo-glow, 0.15);
+    color: $text-color;
+    font-size: 13px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+
+    &:focus {
+      outline: none;
+      border-color: rgba($halo-glow, 0.4);
+    }
+
+    &::placeholder {
+      color: rgba($text-color, 0.25);
+    }
+  }
+}
+
+// Color picker
+.color-picker {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  .color-swatch {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba($halo-glow, 0.2);
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+
+    input[type="color"] {
+      position: absolute;
+      width: 150%;
+      height: 150%;
+      top: -25%;
+      left: -25%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .color-preview {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+    }
+  }
+
+  .color-input {
+    flex: 1;
+  }
+}
+
+.hint-text {
+  font-size: 9px;
+  color: rgba($text-color, 0.3);
+  margin-top: 6px;
+  letter-spacing: 0.5px;
+}
+
+.section-divider {
+  height: 1px;
+  background: rgba($halo-glow, 0.08);
+  margin: 24px 0;
+}
