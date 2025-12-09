@@ -49,6 +49,7 @@ function CircularLoader() {
 function Scene({
   text,
   color,
+  font,
   orbitRadius,
   orbitY,
   speed,
@@ -61,6 +62,7 @@ function Scene({
   objectRotationX,
   objectRotationY,
   objectRotationZ,
+  customObjUrl,
   onLoaded,
 }) {
   const [loading, setLoading] = useState(true);
@@ -91,10 +93,12 @@ function Scene({
               rotationX={objectRotationX}
               rotationY={objectRotationY}
               rotationZ={objectRotationZ}
+              objPath={customObjUrl}
             />
           )}
           text={text}
           color={color}
+          font={font}
           orbitRadius={orbitRadius}
           orbitY={orbitY}
           rotationSpeed={speed}
@@ -114,6 +118,7 @@ export default function App() {
   const [titleVisible, setTitleVisible] = useState(false);
   const [text, setText] = useState("THE HALO EFFECT");
   const [color, setColor] = useState("#5ae76a");
+  const [font, setFont] = useState("/fonts/helvetiker_bold.json");
   const [orbitRadius, setOrbitRadius] = useState(0.4);
   const [speed, setSpeed] = useState(0.5);
   const [glow, setGlow] = useState(3.0);
@@ -126,6 +131,17 @@ export default function App() {
   const [objectRotationY, setObjectRotationY] = useState(10);
   const [objectRotationZ, setObjectRotationZ] = useState(167);
   const [orbitY, setOrbitY] = useState(0.75);
+  const [customObjUrl, setCustomObjUrl] = useState("/models/mesh.obj");
+
+  // Available fonts
+  const fonts = [
+    { name: "Helvetiker Bold", path: "/fonts/helvetiker_bold.json" },
+    { name: "Helvetiker", path: "/fonts/helvetiker_regular.typeface.json" },
+    { name: "Optimer Bold", path: "/fonts/optimer_bold.typeface.json" },
+    { name: "Optimer", path: "/fonts/optimer_regular.typeface.json" },
+    { name: "Gentilis Bold", path: "/fonts/gentilis_bold.typeface.json" },
+    { name: "Gentilis", path: "/fonts/gentilis_regular.typeface.json" },
+  ];
 
   const handleLoaded = () => {
     // Slight delay before showing title for smoother transition
@@ -152,6 +168,7 @@ export default function App() {
             <Scene
               text={text}
               color={color}
+              font={font}
               orbitRadius={orbitRadius}
               orbitY={orbitY}
               speed={speed}
@@ -164,6 +181,7 @@ export default function App() {
               objectRotationX={objectRotationX}
               objectRotationY={objectRotationY}
               objectRotationZ={objectRotationZ}
+              customObjUrl={customObjUrl}
               onLoaded={handleLoaded}
             />
           </Suspense>
@@ -242,6 +260,42 @@ export default function App() {
                 />
               </div>
             </div>
+          </div>
+
+          {/* Font Selector */}
+          <div className="control-group">
+            <div className="control-label">
+              <span className="label-text">Font</span>
+            </div>
+            <div className="input-wrapper">
+              <select
+                value={font}
+                onChange={(e) => setFont(e.target.value)}
+                className="font-select"
+              >
+                {fonts.map((f) => (
+                  <option key={f.path} value={f.path}>
+                    {f.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Custom Object URL */}
+          <div className="control-group">
+            <div className="control-label">
+              <span className="label-text">Object URL</span>
+            </div>
+            <div className="input-wrapper">
+              <input
+                type="text"
+                value={customObjUrl}
+                onChange={(e) => setCustomObjUrl(e.target.value)}
+                placeholder="/models/mesh.obj"
+              />
+            </div>
+            <div className="hint-text">Path to .obj file</div>
           </div>
 
           {/* Object Controls */}

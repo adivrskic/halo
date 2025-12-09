@@ -20,14 +20,15 @@ export default function FloatingObjectWithNeonText({
   object: Object3D = DefaultSphere,
   text = "HALO",
   color = "#ffffff",
+  font = "/fonts/helvetiker_bold.json",
   orbitRadius = 2.2,
   orbitY = 0,
   rotationSpeed = 0.08,
   emissiveIntensity = 3.0,
   charSize = 0.32,
   textThickness = 0.15,
-  letterSpacing = 0.8, // Smaller default spacing
-  rotationAngle = 0, // 0 = horizontal, Math.PI/2 = vertical
+  letterSpacing = 0.8,
+  rotationAngle = 0,
   objectScale = 0.5,
 }) {
   const orbitGroupRef = useRef();
@@ -149,7 +150,7 @@ export default function FloatingObjectWithNeonText({
             >
               <Center>
                 <Text3D
-                  font="/fonts/helvetiker_bold.json"
+                  font={font}
                   size={charSize}
                   height={textThickness}
                   bevelEnabled
