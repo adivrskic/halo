@@ -81,10 +81,6 @@ const FONTS = [
   { name: "Optimer", path: "/fonts/optimer_regular.json" },
   { name: "Gentilis Bold", path: "/fonts/gentilis_bold.json" },
   { name: "Gentilis", path: "/fonts/gentilis_regular.json" },
-  { name: "Droid Sans Bold", path: "/fonts/droid_sans_bold.json" },
-  { name: "Droid Sans", path: "/fonts/droid_sans_regular.json" },
-  { name: "Droid Serif Bold", path: "/fonts/droid_serif_bold.json" },
-  { name: "Droid Serif", path: "/fonts/droid_serif_regular.json" },
 ];
 
 // Loading fallback
@@ -323,7 +319,7 @@ export default function App() {
 
   return (
     <div className="app-root">
-      <div className={`canvas-wrapper ${controlsVisible ? "shifted" : ""}`}>
+      <div className={`canvas-wrapper`}>
         <Canvas
           camera={{ position: [0, 0, 6], fov: 50 }}
           style={{ width: "100vw", height: "100vh" }}
