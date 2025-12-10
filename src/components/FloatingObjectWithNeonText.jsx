@@ -1,33 +1,44 @@
 import React, { useRef, useMemo, useEffect, useState } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { Text3D, Center, Environment } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 
-// Debounce hook
+// Custom hooks
 function useDebouncedValue(value, delay = 200) {
   const [debounced, setDebounced] = useState(value);
 
   useEffect(() => {
-    const handler = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(handler);
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
   }, [value, delay]);
 
   return debounced;
 }
 
-// Check if mobile
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
+function useMediaQuery(query) {
+  const [matches, setMatches] = useState(false);
 
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth <= 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
+    const mediaQuery = window.matchMedia(query);
+    setMatches(mediaQuery.matches);
 
-  return isMobile;
+    const handler = (e) => setMatches(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, [query]);
+
+  return matches;
+}
+
+// Default fallback sphere
+function DefaultSphere() {
+  return (
+    <mesh>
+      <sphereGeometry args={[0.8, 48, 48]} />
+      <meshStandardMaterial color="#ffffff" roughness={0.7} metalness={0.3} />
+    </mesh>
+  );
 }
 
 export default function FloatingObjectWithNeonText({
@@ -48,53 +59,41 @@ export default function FloatingObjectWithNeonText({
   const orbitGroupRef = useRef();
   const chars = useDebouncedValue(Array.from(text));
   const neonColor = useMemo(() => new THREE.Color(color), [color]);
-  const isMobile = useIsMobile();
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
-  // Add dynamic lighting that matches the text color
+  // Dynamic colored lights based on text
   const pointLights = useMemo(() => {
-    const lights = [];
-    const N = Math.min(chars.length, 4);
-
-    for (let i = 0; i < N; i++) {
-      const angle = (i / N) * Math.PI * 2;
-      const x = Math.cos(angle) * orbitRadius;
-      const z = Math.sin(angle) * orbitRadius;
-
-      lights.push({
-        position: [x, 0, z],
-        intensity: 0.8 / N,
+    const count = Math.min(chars.length, 4);
+    return Array.from({ length: count }, (_, i) => {
+      const angle = (i / count) * Math.PI * 2;
+      return {
+        position: [
+          Math.cos(angle) * orbitRadius,
+          0,
+          Math.sin(angle) * orbitRadius,
+        ],
+        intensity: 0.8 / count,
         distance: orbitRadius * 2.5,
-        decay: 2,
-      });
-    }
-
-    return lights;
+      };
+    });
   }, [chars.length, orbitRadius]);
 
-  // Compute letter positions for circular arrangement
-  const charData = useMemo(() => {
-    const N = chars.length || 1;
+  // Letter positions for circular arrangement
+  const charPositions = useMemo(() => {
+    const count = chars.length || 1;
     const totalArc = Math.PI * 2 * letterSpacing;
-    const step = totalArc / N;
+    const step = totalArc / count;
     const startAngle = -totalArc / 2 + step / 2;
 
     return chars.map((_, i) => {
       const angle = startAngle + i * step;
       const x = Math.sin(angle) * orbitRadius;
       const z = Math.cos(angle) * orbitRadius;
-      // Calculate rotation to face outward from center using atan2
-      // This ensures all letters face away from the center consistently
-      const rotationY = Math.atan2(x, z);
-      return {
-        angle,
-        x,
-        z,
-        rotationY,
-      };
+      return { x, z, rotationY: Math.atan2(x, z) };
     });
   }, [chars, orbitRadius, letterSpacing]);
 
-  // Animate the orbiting text
+  // Orbit animation
   useFrame((_, delta) => {
     if (orbitGroupRef.current) {
       orbitGroupRef.current.rotation.y += delta * rotationSpeed;
@@ -103,10 +102,8 @@ export default function FloatingObjectWithNeonText({
 
   return (
     <>
-      {/* Environment map for realistic reflections */}
       <Environment preset="city" />
 
-      {/* Bloom effect - reduced on mobile for performance */}
       <EffectComposer>
         <Bloom
           intensity={isMobile ? 0.8 : 1.2}
@@ -116,28 +113,17 @@ export default function FloatingObjectWithNeonText({
         />
       </EffectComposer>
 
-      {/* Ambient light - for overall scene */}
+      {/* Lighting setup */}
       <ambientLight intensity={0.3} />
-
-      {/* Key light - main illumination for gold object */}
-      <directionalLight position={[5, 5, 5]} intensity={1.5} color="#ffffff" />
-
-      {/* Fill light - softer, from opposite side */}
+      <directionalLight position={[5, 5, 5]} intensity={1.5} />
       <directionalLight
         position={[-3, 2, -3]}
         intensity={0.5}
         color="#ffffee"
       />
+      <pointLight position={[0, 3, -3]} intensity={0.8} distance={10} />
 
-      {/* Rim light - adds edge definition */}
-      <pointLight
-        position={[0, 3, -3]}
-        intensity={0.8}
-        color="#ffffff"
-        distance={10}
-      />
-
-      {/* Colored lights from text glow */}
+      {/* Colored accent lights */}
       {pointLights.map((light, i) => (
         <pointLight
           key={i}
@@ -145,23 +131,23 @@ export default function FloatingObjectWithNeonText({
           color={neonColor}
           intensity={light.intensity}
           distance={light.distance}
-          decay={light.decay}
+          decay={2}
         />
       ))}
 
-      {/* Central object - positioned at exact center (0,0,0) */}
-      <group position={[0, 0, 0]}>
+      {/* Central object */}
+      <group>
         <Object3D scale={objectScale} />
       </group>
 
-      {/* Orbiting letters - rotates around Y axis, positioned at orbitY height */}
+      {/* Orbiting text */}
       <group
         ref={orbitGroupRef}
         position={[0, orbitY, 0]}
         rotation={[rotationAngle, 0, 0]}
       >
         {chars.map((char, i) => {
-          const { x, z, rotationY } = charData[i];
+          const { x, z, rotationY } = charPositions[i];
           return (
             <group key={i} position={[x, 0, z]} rotation={[0, rotationY, 0]}>
               <Center>
@@ -190,15 +176,5 @@ export default function FloatingObjectWithNeonText({
         })}
       </group>
     </>
-  );
-}
-
-// Default central object (fallback) - centered and stationary
-function DefaultSphere() {
-  return (
-    <mesh position={[0, 0, 0]}>
-      <sphereGeometry args={[0.8, 48, 48]} />
-      <meshStandardMaterial color="#ffffff" roughness={0.7} metalness={0.3} />
-    </mesh>
   );
 }
