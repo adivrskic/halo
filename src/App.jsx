@@ -1,5 +1,5 @@
-import React, { useState, Suspense } from "react";
-import { Canvas } from "@react-three/fiber";
+import React, { useState, Suspense, useRef } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import FloatingObjectWithNeonText from "./components/FloatingObjectWithNeonText";
 import CustomObject from "./components/CustomObject";
@@ -45,8 +45,8 @@ function CircularLoader() {
   );
 }
 
-// Main Scene Component
-function Scene({
+// Inner scene content that triggers Suspense when loading
+function SceneContent({
   text,
   color,
   font,
@@ -65,49 +65,112 @@ function Scene({
   customObjUrl,
   onLoaded,
 }) {
-  const [loading, setLoading] = useState(true);
-
+  // Call onLoaded when this component mounts (meaning assets are loaded)
   React.useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => {
-      setLoading(false);
-      onLoaded?.();
-    }, 2000);
-
-    return () => clearTimeout(timer);
+    onLoaded?.();
   }, [onLoaded]);
 
   return (
-    <>
-      {loading && (
-        <Html center>
-          <CircularLoader />
-        </Html>
-      )}
-
-      {!loading && (
-        <FloatingObjectWithNeonText
-          object={() => (
-            <CustomObject
-              scale={objectScale}
-              rotationX={objectRotationX}
-              rotationY={objectRotationY}
-              rotationZ={objectRotationZ}
-              objPath={customObjUrl}
-            />
-          )}
-          text={text}
-          color={color}
-          font={font}
-          orbitRadius={orbitRadius}
-          orbitY={orbitY}
-          rotationSpeed={speed}
-          emissiveIntensity={glow}
-          charSize={charSize}
-          textThickness={textThickness}
-          letterSpacing={letterSpacing}
-          rotationAngle={rotationAngle * (Math.PI / 180)}
+    <FloatingObjectWithNeonText
+      object={() => (
+        <CustomObject
+          scale={objectScale}
+          rotationX={objectRotationX}
+          rotationY={objectRotationY}
+          rotationZ={objectRotationZ}
+          objPath={customObjUrl}
         />
+      )}
+      text={text}
+      color={color}
+      font={font}
+      orbitRadius={orbitRadius}
+      orbitY={orbitY}
+      rotationSpeed={speed}
+      emissiveIntensity={glow}
+      charSize={charSize}
+      textThickness={textThickness}
+      letterSpacing={letterSpacing}
+      rotationAngle={rotationAngle * (Math.PI / 180)}
+    />
+  );
+}
+
+// Loading fallback component shown inside Canvas
+function CanvasLoader({ visible }) {
+  return (
+    <Html center>
+      <div className={`loading-screen ${visible ? "" : "fade-out"}`}>
+        <div className="loading-container">
+          <div className="spinner" />
+          <div className="loading-title">HALO</div>
+        </div>
+      </div>
+    </Html>
+  );
+}
+
+// Animated wrapper that slides up and fades in
+function AnimatedContent({ children, animate }) {
+  const groupRef = useRef();
+  const targetY = 0;
+  const startY = -0.125;
+
+  useFrame(() => {
+    if (groupRef.current) {
+      if (animate) {
+        // Lerp position up
+        groupRef.current.position.y +=
+          (targetY - groupRef.current.position.y) * 0.04;
+      } else {
+        groupRef.current.position.y = startY;
+      }
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={[0, startY, 0]}>
+      {children}
+    </group>
+  );
+}
+
+// Main Scene Component with Suspense
+function Scene(props) {
+  const [loaded, setLoaded] = useState(false);
+  const [showContent, setShowContent] = useState(false);
+  const [animateContent, setAnimateContent] = useState(false);
+
+  const handleLoaded = () => {
+    setLoaded(true);
+    // Delay showing content to allow loader to fade out
+    setTimeout(() => {
+      setShowContent(true);
+      // Start animation after content is visible
+      setTimeout(() => {
+        setAnimateContent(true);
+        props.onLoaded?.();
+      }, 100);
+    }, 500);
+  };
+
+  return (
+    <>
+      {!showContent && <CanvasLoader visible={!loaded} />}
+      {showContent && (
+        <AnimatedContent animate={animateContent}>
+          <Suspense fallback={null}>
+            <SceneContent {...props} onLoaded={handleLoaded} />
+          </Suspense>
+        </AnimatedContent>
+      )}
+      {/* Preload content while loader is showing */}
+      {!showContent && (
+        <group visible={false}>
+          <Suspense fallback={null}>
+            <SceneContent {...props} onLoaded={handleLoaded} />
+          </Suspense>
+        </group>
       )}
     </>
   );
@@ -136,11 +199,15 @@ export default function App() {
   // Available fonts
   const fonts = [
     { name: "Helvetiker Bold", path: "/fonts/helvetiker_bold.json" },
-    { name: "Helvetiker", path: "/fonts/helvetiker_regular.typeface.json" },
-    { name: "Optimer Bold", path: "/fonts/optimer_bold.typeface.json" },
-    { name: "Optimer", path: "/fonts/optimer_regular.typeface.json" },
-    { name: "Gentilis Bold", path: "/fonts/gentilis_bold.typeface.json" },
-    { name: "Gentilis", path: "/fonts/gentilis_regular.typeface.json" },
+    { name: "Helvetiker", path: "/fonts/helvetiker_regular.json" },
+    { name: "Optimer Bold", path: "/fonts/optimer_bold.json" },
+    { name: "Optimer", path: "/fonts/optimer_regular.json" },
+    { name: "Gentilis Bold", path: "/fonts/gentilis_bold.json" },
+    { name: "Gentilis", path: "/fonts/gentilis_regular.json" },
+    { name: "Droid Sans Bold", path: "/fonts/droid_sans_bold.json" },
+    { name: "Droid Sans", path: "/fonts/droid_sans_regular.json" },
+    { name: "Droid Serif Bold", path: "/fonts/droid_serif_bold.json" },
+    { name: "Droid Serif", path: "/fonts/droid_serif_regular.json" },
   ];
 
   const handleLoaded = () => {
@@ -164,27 +231,25 @@ export default function App() {
             color="#ffffff"
           />
 
-          <Suspense fallback={null}>
-            <Scene
-              text={text}
-              color={color}
-              font={font}
-              orbitRadius={orbitRadius}
-              orbitY={orbitY}
-              speed={speed}
-              glow={glow}
-              charSize={charSize}
-              textThickness={textThickness}
-              letterSpacing={letterSpacing}
-              rotationAngle={rotationAngle}
-              objectScale={objectScale}
-              objectRotationX={objectRotationX}
-              objectRotationY={objectRotationY}
-              objectRotationZ={objectRotationZ}
-              customObjUrl={customObjUrl}
-              onLoaded={handleLoaded}
-            />
-          </Suspense>
+          <Scene
+            text={text}
+            color={color}
+            font={font}
+            orbitRadius={orbitRadius}
+            orbitY={orbitY}
+            speed={speed}
+            glow={glow}
+            charSize={charSize}
+            textThickness={textThickness}
+            letterSpacing={letterSpacing}
+            rotationAngle={rotationAngle}
+            objectScale={objectScale}
+            objectRotationX={objectRotationX}
+            objectRotationY={objectRotationY}
+            objectRotationZ={objectRotationZ}
+            customObjUrl={customObjUrl}
+            onLoaded={handleLoaded}
+          />
         </Canvas>
       </div>
 

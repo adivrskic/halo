@@ -12,20 +12,39 @@ $transition: all 0.3s ease;
   box-sizing: border-box;
 }
 
+html {
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  -webkit-overflow-scrolling: touch;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   background: $background-color;
   overflow: hidden;
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: none;
+  touch-action: none;
 }
 
 // Main container
 .app-root {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   background: $background-color;
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: none;
 }
 
 // Canvas wrapper for mobile shift
@@ -53,6 +72,13 @@ body {
   justify-content: center;
   background: $background-color;
   z-index: 1000;
+  opacity: 1;
+  transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  &.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
 
   .loading-container {
     position: relative;
@@ -252,6 +278,10 @@ body {
   max-height: inherit;
   overflow-y: auto;
   padding: 10px 0;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  padding-right: 20px;
 
   // Minimal scrollbar
   &::-webkit-scrollbar {

@@ -1,7 +1,7 @@
 import { useLoader } from "@react-three/fiber";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import * as THREE from "three";
-import { useMemo, Suspense, useRef } from "react";
+import { useMemo, useRef } from "react";
 
 // Gold material settings - subtle, less glowy
 const GOLD_COLOR = "#D4AF37";
@@ -96,13 +96,5 @@ function GoldSphere({ scale = 0.5 }) {
   );
 }
 
-// Wrapper with Suspense fallback
-function CustomObject(props) {
-  return (
-    <Suspense fallback={<GoldSphere scale={props.scale} />}>
-      <CustomObjectInner {...props} />
-    </Suspense>
-  );
-}
-
-export default CustomObject;
+// Export the inner component directly - Suspense is handled at Scene level
+export default CustomObjectInner;
