@@ -80,10 +80,16 @@ export default function FloatingObjectWithNeonText({
 
     return chars.map((_, i) => {
       const angle = startAngle + i * step;
+      const x = Math.sin(angle) * orbitRadius;
+      const z = Math.cos(angle) * orbitRadius;
+      // Calculate rotation to face outward from center using atan2
+      // This ensures all letters face away from the center consistently
+      const rotationY = Math.atan2(x, z);
       return {
         angle,
-        x: Math.sin(angle) * orbitRadius,
-        z: Math.cos(angle) * orbitRadius,
+        x,
+        z,
+        rotationY,
       };
     });
   }, [chars, orbitRadius, letterSpacing]);
@@ -103,8 +109,8 @@ export default function FloatingObjectWithNeonText({
       {/* Bloom effect - reduced on mobile for performance */}
       <EffectComposer>
         <Bloom
-          intensity={isMobile ? 1.0 : 1.6}
-          luminanceThreshold={0.0}
+          intensity={isMobile ? 0.8 : 1.2}
+          luminanceThreshold={0.2}
           luminanceSmoothing={0.9}
           height={isMobile ? 200 : 300}
         />
@@ -155,13 +161,9 @@ export default function FloatingObjectWithNeonText({
         rotation={[rotationAngle, 0, 0]}
       >
         {chars.map((char, i) => {
-          const { angle, x, z } = charData[i];
+          const { x, z, rotationY } = charData[i];
           return (
-            <group
-              key={i}
-              position={[x, 0, z]}
-              rotation={[0, angle + Math.PI, 0]}
-            >
+            <group key={i} position={[x, 0, z]} rotation={[0, rotationY, 0]}>
               <Center>
                 <Text3D
                   font={font}
