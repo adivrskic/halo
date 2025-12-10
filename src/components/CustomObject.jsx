@@ -3,13 +3,13 @@ import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import * as THREE from "three";
 import { useMemo, useRef } from "react";
 
-// Gold material settings - subtle, less glowy
-const GOLD_COLOR = "#D4AF37";
+// Gold material settings - toned down for better text readability
+const GOLD_COLOR = "#B8860B";
 const GOLD_SETTINGS = {
   color: new THREE.Color(GOLD_COLOR),
-  metalness: 0.9,
-  roughness: 0.35,
-  envMapIntensity: 0.8,
+  metalness: 0.85,
+  roughness: 0.5,
+  envMapIntensity: 0.2,
 };
 
 function CustomObjectInner({
@@ -30,7 +30,7 @@ function CustomObjectInner({
 
     clone.traverse((child) => {
       if (child.isMesh) {
-        // Replace with gold material
+        // Replace with gold material optimized for env map reflections
         child.material = new THREE.MeshStandardMaterial({
           color: GOLD_SETTINGS.color,
           metalness: GOLD_SETTINGS.metalness,
@@ -91,6 +91,7 @@ function GoldSphere({ scale = 0.5 }) {
         color={GOLD_SETTINGS.color}
         metalness={GOLD_SETTINGS.metalness}
         roughness={GOLD_SETTINGS.roughness}
+        envMapIntensity={GOLD_SETTINGS.envMapIntensity}
       />
     </mesh>
   );

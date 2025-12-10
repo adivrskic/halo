@@ -1,6 +1,6 @@
-import React, { useState, Suspense, useRef } from "react";
+import React, { useState, Suspense, useRef, useCallback } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Html } from "@react-three/drei";
+import { Html, OrbitControls } from "@react-three/drei";
 import FloatingObjectWithNeonText from "./components/FloatingObjectWithNeonText";
 import CustomObject from "./components/CustomObject";
 import "./styles.scss";
@@ -30,6 +30,39 @@ const GitHubIcon = () => (
     strokeLinejoin="round"
   >
     <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+  </svg>
+);
+
+// Reset icon
+const ResetIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+    <path d="M3 3v5h5" />
+  </svg>
+);
+
+// Share icon
+const ShareIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="18" cy="5" r="3" />
+    <circle cx="6" cy="12" r="3" />
+    <circle cx="18" cy="19" r="3" />
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
   </svg>
 );
 
@@ -114,7 +147,7 @@ function CanvasLoader({ visible }) {
 function AnimatedContent({ children, animate }) {
   const groupRef = useRef();
   const targetY = 0;
-  const startY = -0.125;
+  const startY = -1.5;
 
   useFrame(() => {
     if (groupRef.current) {
@@ -177,24 +210,149 @@ function Scene(props) {
 }
 
 export default function App() {
+  // Default settings
+  const DEFAULTS = {
+    text: "THE HALO EFFECT",
+    color: "#5ae76a",
+    font: "/fonts/helvetiker_bold.json",
+    orbitRadius: 0.4,
+    speed: 0.5,
+    glow: 3.0,
+    charSize: 0.14,
+    textThickness: 0.02,
+    letterSpacing: 0.7,
+    rotationAngle: 327,
+    objectScale: 2,
+    objectRotationX: -106,
+    objectRotationY: 10,
+    objectRotationZ: 167,
+    orbitY: 0.75,
+    customObjUrl: "/models/mesh.obj",
+  };
+
   const [controlsVisible, setControlsVisible] = useState(false);
   const [titleVisible, setTitleVisible] = useState(false);
-  const [text, setText] = useState("THE HALO EFFECT");
-  const [color, setColor] = useState("#5ae76a");
-  const [font, setFont] = useState("/fonts/helvetiker_bold.json");
-  const [orbitRadius, setOrbitRadius] = useState(0.4);
-  const [speed, setSpeed] = useState(0.5);
-  const [glow, setGlow] = useState(3.0);
-  const [charSize, setCharSize] = useState(0.14);
-  const [textThickness, setTextThickness] = useState(0.02);
-  const [letterSpacing, setLetterSpacing] = useState(0.7);
-  const [rotationAngle, setRotationAngle] = useState(327);
-  const [objectScale, setObjectScale] = useState(2);
-  const [objectRotationX, setObjectRotationX] = useState(-106);
-  const [objectRotationY, setObjectRotationY] = useState(10);
-  const [objectRotationZ, setObjectRotationZ] = useState(167);
-  const [orbitY, setOrbitY] = useState(0.75);
-  const [customObjUrl, setCustomObjUrl] = useState("/models/mesh.obj");
+  const [text, setText] = useState(DEFAULTS.text);
+  const [color, setColor] = useState(DEFAULTS.color);
+  const [font, setFont] = useState(DEFAULTS.font);
+  const [orbitRadius, setOrbitRadius] = useState(DEFAULTS.orbitRadius);
+  const [speed, setSpeed] = useState(DEFAULTS.speed);
+  const [glow, setGlow] = useState(DEFAULTS.glow);
+  const [charSize, setCharSize] = useState(DEFAULTS.charSize);
+  const [textThickness, setTextThickness] = useState(DEFAULTS.textThickness);
+  const [letterSpacing, setLetterSpacing] = useState(DEFAULTS.letterSpacing);
+  const [rotationAngle, setRotationAngle] = useState(DEFAULTS.rotationAngle);
+  const [objectScale, setObjectScale] = useState(DEFAULTS.objectScale);
+  const [objectRotationX, setObjectRotationX] = useState(
+    DEFAULTS.objectRotationX
+  );
+  const [objectRotationY, setObjectRotationY] = useState(
+    DEFAULTS.objectRotationY
+  );
+  const [objectRotationZ, setObjectRotationZ] = useState(
+    DEFAULTS.objectRotationZ
+  );
+  const [orbitY, setOrbitY] = useState(DEFAULTS.orbitY);
+  const [customObjUrl, setCustomObjUrl] = useState(DEFAULTS.customObjUrl);
+  const [shareMessage, setShareMessage] = useState("");
+
+  // Reset all settings to defaults
+  const handleReset = useCallback(() => {
+    setText(DEFAULTS.text);
+    setColor(DEFAULTS.color);
+    setFont(DEFAULTS.font);
+    setOrbitRadius(DEFAULTS.orbitRadius);
+    setSpeed(DEFAULTS.speed);
+    setGlow(DEFAULTS.glow);
+    setCharSize(DEFAULTS.charSize);
+    setTextThickness(DEFAULTS.textThickness);
+    setLetterSpacing(DEFAULTS.letterSpacing);
+    setRotationAngle(DEFAULTS.rotationAngle);
+    setObjectScale(DEFAULTS.objectScale);
+    setObjectRotationX(DEFAULTS.objectRotationX);
+    setObjectRotationY(DEFAULTS.objectRotationY);
+    setObjectRotationZ(DEFAULTS.objectRotationZ);
+    setOrbitY(DEFAULTS.orbitY);
+    setCustomObjUrl(DEFAULTS.customObjUrl);
+  }, []);
+
+  // Generate share URL with encoded settings
+  const handleShare = useCallback(async () => {
+    const settings = {
+      t: text,
+      c: color,
+      f: font,
+      or: orbitRadius,
+      s: speed,
+      g: glow,
+      cs: charSize,
+      tt: textThickness,
+      ls: letterSpacing,
+      ra: rotationAngle,
+      os: objectScale,
+      rx: objectRotationX,
+      ry: objectRotationY,
+      rz: objectRotationZ,
+      oy: orbitY,
+    };
+
+    const encoded = btoa(JSON.stringify(settings));
+    const url = `${window.location.origin}${window.location.pathname}?s=${encoded}`;
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareMessage("Link copied!");
+      setTimeout(() => setShareMessage(""), 2000);
+    } catch (err) {
+      // Fallback for browsers that don't support clipboard API
+      setShareMessage("Copy URL from address bar");
+      setTimeout(() => setShareMessage(""), 3000);
+    }
+  }, [
+    text,
+    color,
+    font,
+    orbitRadius,
+    speed,
+    glow,
+    charSize,
+    textThickness,
+    letterSpacing,
+    rotationAngle,
+    objectScale,
+    objectRotationX,
+    objectRotationY,
+    objectRotationZ,
+    orbitY,
+  ]);
+
+  // Load settings from URL on mount
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const encoded = params.get("s");
+    if (encoded) {
+      try {
+        const settings = JSON.parse(atob(encoded));
+        if (settings.t) setText(settings.t);
+        if (settings.c) setColor(settings.c);
+        if (settings.f) setFont(settings.f);
+        if (settings.or !== undefined) setOrbitRadius(settings.or);
+        if (settings.s !== undefined) setSpeed(settings.s);
+        if (settings.g !== undefined) setGlow(settings.g);
+        if (settings.cs !== undefined) setCharSize(settings.cs);
+        if (settings.tt !== undefined) setTextThickness(settings.tt);
+        if (settings.ls !== undefined) setLetterSpacing(settings.ls);
+        if (settings.ra !== undefined) setRotationAngle(settings.ra);
+        if (settings.os !== undefined) setObjectScale(settings.os);
+        if (settings.rx !== undefined) setObjectRotationX(settings.rx);
+        if (settings.ry !== undefined) setObjectRotationY(settings.ry);
+        if (settings.rz !== undefined) setObjectRotationZ(settings.rz);
+        if (settings.oy !== undefined) setOrbitY(settings.oy);
+      } catch (e) {
+        console.warn("Failed to parse shared settings");
+      }
+    }
+  }, []);
 
   // Available fonts
   const fonts = [
@@ -231,6 +389,18 @@ export default function App() {
             color="#ffffff"
           />
 
+          {/* Camera controls - drag to rotate */}
+          <OrbitControls
+            enablePan={false}
+            enableZoom={true}
+            minDistance={3}
+            maxDistance={12}
+            minPolarAngle={Math.PI / 4}
+            maxPolarAngle={Math.PI - Math.PI / 4}
+            dampingFactor={0.05}
+            enableDamping={true}
+          />
+
           <Scene
             text={text}
             color={color}
@@ -260,8 +430,16 @@ export default function App() {
         </div>
 
         <div className={`bottom-bar-right ${titleVisible ? "visible" : ""}`}>
+          <button
+            className="icon-link"
+            onClick={handleShare}
+            title="Copy share link"
+          >
+            <ShareIcon />
+          </button>
+
           <a
-            href="https://github.com/xrayzh"
+            href="https://github.com/adivrskic"
             target="_blank"
             rel="noopener noreferrer"
             className="icon-link"
@@ -276,6 +454,9 @@ export default function App() {
             {controlsVisible ? <CloseIcon /> : <HaloIcon />}
           </button>
         </div>
+
+        {/* Share message toast */}
+        {shareMessage && <div className="share-toast">{shareMessage}</div>}
       </div>
 
       {/* Control Panel */}

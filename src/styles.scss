@@ -164,7 +164,7 @@ body {
   }
 }
 
-// Icon link (GitHub)
+// Icon link (GitHub, Reset, Share)
 .icon-link {
   width: 36px;
   height: 36px;
@@ -172,7 +172,11 @@ body {
   align-items: center;
   justify-content: center;
   color: rgba($text-color, 0.5);
+  background: transparent;
+  border: none;
+  cursor: pointer;
   transition: $transition;
+  text-decoration: none;
 
   &:hover {
     color: rgba($text-color, 0.9);
@@ -181,6 +185,41 @@ body {
   svg {
     width: 18px;
     height: 18px;
+  }
+}
+
+// Share toast notification
+.share-toast {
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba($halo-glow, 0.1);
+  border: 1px solid rgba($halo-glow, 0.3);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: $halo-glow;
+  letter-spacing: 1px;
+  animation: fadeInOut 2s ease;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  85% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
   }
 }
 
@@ -281,7 +320,6 @@ body {
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
   overscroll-behavior: contain;
-  padding-right: 20px;
 
   // Minimal scrollbar
   &::-webkit-scrollbar {

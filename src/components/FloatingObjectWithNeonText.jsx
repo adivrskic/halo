@@ -1,6 +1,6 @@
 import React, { useRef, useMemo, useEffect, useState } from "react";
-import { useFrame } from "@react-three/fiber";
-import { Text3D, Center } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
+import { Text3D, Center, Environment } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 
@@ -14,6 +14,20 @@ function useDebouncedValue(value, delay = 200) {
   }, [value, delay]);
 
   return debounced;
+}
+
+// Check if mobile
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  return isMobile;
 }
 
 export default function FloatingObjectWithNeonText({
@@ -34,6 +48,7 @@ export default function FloatingObjectWithNeonText({
   const orbitGroupRef = useRef();
   const chars = useDebouncedValue(Array.from(text));
   const neonColor = useMemo(() => new THREE.Color(color), [color]);
+  const isMobile = useIsMobile();
 
   // Add dynamic lighting that matches the text color
   const pointLights = useMemo(() => {
@@ -59,18 +74,16 @@ export default function FloatingObjectWithNeonText({
   // Compute letter positions for circular arrangement
   const charData = useMemo(() => {
     const N = chars.length || 1;
-    // Calculate the total arc the letters will span
-    // letterSpacing controls how much of the circle they use
     const totalArc = Math.PI * 2 * letterSpacing;
     const step = totalArc / N;
-    const startAngle = -totalArc / 2 + step / 2; // Center the letters
+    const startAngle = -totalArc / 2 + step / 2;
 
     return chars.map((_, i) => {
       const angle = startAngle + i * step;
       return {
         angle,
-        x: Math.sin(angle) * orbitRadius, // sin for X so angle 0 is at front
-        z: Math.cos(angle) * orbitRadius, // cos for Z
+        x: Math.sin(angle) * orbitRadius,
+        z: Math.cos(angle) * orbitRadius,
       };
     });
   }, [chars, orbitRadius, letterSpacing]);
@@ -84,13 +97,16 @@ export default function FloatingObjectWithNeonText({
 
   return (
     <>
-      {/* Bloom effect */}
+      {/* Environment map for realistic reflections */}
+      <Environment preset="city" />
+
+      {/* Bloom effect - reduced on mobile for performance */}
       <EffectComposer>
         <Bloom
-          intensity={1.6}
+          intensity={isMobile ? 1.0 : 1.6}
           luminanceThreshold={0.0}
           luminanceSmoothing={0.9}
-          height={300}
+          height={isMobile ? 200 : 300}
         />
       </EffectComposer>
 
@@ -144,8 +160,6 @@ export default function FloatingObjectWithNeonText({
             <group
               key={i}
               position={[x, 0, z]}
-              // Rotate to face OUTWARD from center
-              // The letter's front face (Z+) should point away from center
               rotation={[0, angle + Math.PI, 0]}
             >
               <Center>
