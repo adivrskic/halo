@@ -104,7 +104,7 @@ body {
   position: relative;
 
   @media (max-width: 768px) {
-    --size: 200px;
+    --size: 100vh;
   }
 }
 
@@ -425,7 +425,7 @@ body {
     right: 16px;
     left: 16px;
     width: auto;
-    max-height: 88vh;
+    max-height: 84vh;
   }
 }
 
