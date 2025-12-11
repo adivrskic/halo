@@ -415,6 +415,7 @@ body {
   max-height: 70vh;
   z-index: 99;
   opacity: 0;
+
   visibility: hidden;
   transform: translateY(20px);
   transition: opacity 0.8s $ease-out-expo, visibility 0.8s $ease-out-expo,
@@ -424,6 +425,7 @@ body {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+    pointer-events: all;
   }
 
   @media (max-width: 768px) {
