@@ -68,13 +68,12 @@ function RippleLoader({ visible }) {
   return (
     <div className={`loader-overlay ${visible ? "" : "fade-out"}`}>
       <div className="loader">
-        <div className="box">
-          <p className="logo">HALO</p>
-        </div>
         <div className="box"></div>
         <div className="box"></div>
         <div className="box"></div>
         <div className="box"></div>
+        <div className="box"></div>
+        <p className="logo">HALO</p>
       </div>
     </div>
   );
