@@ -158,6 +158,11 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 999;
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 4px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
 }
 
 @keyframes ripple {
