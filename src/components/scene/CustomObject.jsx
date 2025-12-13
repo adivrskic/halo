@@ -3,7 +3,6 @@ import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import * as THREE from "three";
 import { useMemo, useRef } from "react";
 
-// Gold material - subtle reflections for better text readability
 const GOLD_MATERIAL_CONFIG = {
   color: new THREE.Color("#B8860B"),
   metalness: 0.85,
@@ -21,7 +20,6 @@ export default function CustomObject({
   const groupRef = useRef();
   const obj = useLoader(OBJLoader, objPath);
 
-  // Clone and apply gold material
   const clonedObj = useMemo(() => {
     const clone = obj.clone();
     const material = new THREE.MeshStandardMaterial(GOLD_MATERIAL_CONFIG);
@@ -35,7 +33,6 @@ export default function CustomObject({
     return clone;
   }, [obj]);
 
-  // Calculate centering offset and normalized scale
   const { centerOffset, normalizedScale } = useMemo(() => {
     const bbox = new THREE.Box3().setFromObject(clonedObj);
     const dimensions = new THREE.Vector3();
@@ -53,7 +50,6 @@ export default function CustomObject({
     };
   }, [clonedObj, scale]);
 
-  // Convert degrees to radians
   const rotation = [
     (rotationX * Math.PI) / 180,
     (rotationY * Math.PI) / 180,
